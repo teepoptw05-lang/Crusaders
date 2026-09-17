@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crusade Quest - เกมทบทวนประวัติศาสตร์สงครามครูเสด</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Sarabun', 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #1a110a; color: #f4e8c1; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .game-card { background: #2c1d11; border: 3px solid #b8860b; border-radius: 12px; width: 100%; max-width: 650px; padding: 25px; box-shadow: 0 0 20px rgba(184, 134, 11, 0.4); text-align: center; }
+        h1 { color: #ffd700; margin-top: 0; border-bottom: 2px solid #b8860b; padding-bottom: 10px; }
+        .status-bar { display: flex; justify-content: space-between; font-size: 1.1em; background: #1a110a; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #5c4018; }
+        .btn { background: #8b0000; color: white; border: 2px solid #ffd700; padding: 12px 20px; font-size: 1em; border-radius: 6px; cursor: pointer; transition: 0.2s; width: 100%; margin: 8px 0; font-weight: bold; }
+        .btn:hover { background: #b22222; transform: translateY(-2px); }
+        .intro-text { line-height: 1.6; text-align: left; }
+        #explanation { background: #3a2717; padding: 15px; border-radius: 8px; margin-top: 15px; display: none; text-align: left; border-left: 4px solid #ffd700; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <h1>⚔️ Crusade Quest ⚔️</h1>
+    <p style="font-style: italic; color: #d3d3d3;">พิชิตบททดสอบ 9 ยุคสมัยแห่งสงครามครูเสด</p>
+
+    <!-- หน้าเริ่มเกม -->
+    <div id="start-screen">
+        <div class="intro-text">
+            <p>👋 <strong>ท่านแม่ทัพ!</strong> ยินดีต้อนรับสู่ภารกิจทดสอบความรู้หลังการนำเสนอ</p>
+            <p>ท่านจะต้องนำทัพผ่านเหตุการณ์สงครามครูเสดทั้ง 9 ครั้ง โดยต้องเลือกตอบคำถามทางประวัติศาสตร์ให้ถูกต้อง เพื่อรักษาเสบียงและกองกำลังทหารให้อยู่รอดจนถึงครั้งสุดท้าย!</p>
+        </div>
+        <button class="btn" onclick="startGame()">⚔️ เริ่มออกเดินทาง ⚔️</button>
+    </div>
+
+    <!-- หน้าเล่นเกม -->
+    <div id="game-screen" class="hidden">
+        <div class="status-bar">
+            <span>🚩 ครูเสดครั้งที่: <strong id="crusade-num">1</strong>/9</span>
+            <span>🍞 เสบียง/HP: <strong id="hp">100</strong>%</span>
+        </div>
+        
+        <h3 id="question-text" style="text-align: left; min-height: 50px;">คำถามจะปรากฏตรงนี้</h3>
+        
+        <div id="options-container"></div>
+        
+        <div id="explanation"></div>
+        <button id="next-btn" class="btn hidden" onclick="nextQuestion()">เดินทัพต่อ ➡️</button>
+    </div>
+
+    <!-- หน้าจบเกม -->
+    <div id="end-screen" class="hidden">
+        <h2 id="end-title"></h2>
+        <p id="end-message" style="font-size: 1.2em;"></p>
+        <button class="btn" onclick="location.reload()">🔄 เล่นใหม่อีกครั้ง</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            num: 1,
+            q: "สงครามครูเสดครั้งที่ 1 (ค.ศ. 1096–1099) จบลงอย่างไร?",
+            options: [
+                "ฝั่งครูเสดยึดเมืองเยรูซาเล็มได้สำเร็จ และตั้งรัฐครูเสดขึ้นมา",
+                "ฝั่งมุสลิมป้องกันเมืองไว้ได้ทั้งหมด",
+                "เกิดการเจรจาสันติภาพโดยไม่เสียเลือดเนื้อ"
+            ],
+            ans: 0,
+            exp: "ถูกต้อง! ครูเสดครั้งที่ 1 เป็นครั้งเดียวที่ฝ่ายครูเสดสามารถยึดเมืองเยรูซาเล็มคืนมาได้สำเร็จ"
+        },
+        {
+            num: 2,
+            q: "ชนวนเหตุสำคัญที่ทำให้เกิด 'สงครามครูเสดครั้งที่ 2' คืออะไร?",
+            options: [
+                "การสิ้นพระชนม์ของกษัตริย์เยรูซาเล็ม",
+                "การล่มสลายของรัฐเอเดสซา (Edessa) ที่ถูกมุสลิมยึดคืน",
+                "การเข้าบุกปล้นสะดมเมืองคอนสแตนติโนเปิล"
+            ],
+            ans: 1,
+            exp: "ถูกต้อง! การเสียเมืองเอเดสซาในปี 1144 ทำให้ยุโรปต้องส่งกองทัพครูเสดครั้งที่ 2 ออกมา"
+        },
+        {
+            num: 3,
+            q: "ในสงครามครูเสดครั้งที่ 3 ใครคือผู้นำมุสลิมที่มีชื่อเสียงในการต่อสู้กับ 'พระเจ้าการ์ดใจสิงห์' (Richard the Lionheart)?",
+            options: ["ซาลาดิน (Saladin)", "ไบบาร์ส (Baibars)", "มูฮัมหมัดที่ 2"],
+            ans: 0,
+            exp: "ถูกต้อง! ซาลาดิน (Saladin) คือมหาราชผู้รวบรวมมุสลิมและทำสงครามขับเคี่ยวกับกษัตริย์ริชาร์ดอย่างสมศักดิ์ศรี"
+        },
+        {
+            num: 4,
+            q: "สงครามครูเสดครั้งที่ 4 มีความพลิกผันและน่าเศร้าอย่างไร?",
+            options: [
+                "กองทัพจมน้ำทะเลเสียชีวิตทั้งหมด",
+                "กองทัพครูเสดเปลี่ยนเป้าหมายไปบุกยึดและปล้นเมืองคอนสแตนติโนเปิลของคริสต์ด้วยกันเอง",
+                "กองทัพยอมแพ้ตั้งแต่ยังเดินทางไม่ถึงแดนศักดิ์สิทธิ์"
+            ],
+            ans: 1,
+            exp: "ถูกต้อง! ครูเสดครั้งที่ 4 ถูกเบี่ยงเบนเส้นทางเนื่องจากปัญหาทางการเมืองและการเงิน จนไปปล้นกรุงคอนสแตนติโนเปิล"
+        },
+        {
+            num: 5,
+            q: "เป้าหมายหลักทางยุทธศาสตร์ของสงครามครูเสดครั้งที่ 5 คือประเทศใดเพื่อเป็นฐานบุกเยรูซาเล็ม?",
+            options: ["กรีซ", "อียิปต์", "สเปน"],
+            ans: 1,
+            exp: "ถูกต้อง! กองทัพครูเสดบุกโจมตีเมืองดามิเอตตาในอียิปต์ โดยหวังใช้เป็นข้อต่อรองแลกกับเยรูซาเล็ม"
+        },
+        {
+            num: 6,
+            q: "สงครามครูเสดครั้งที่ 6 มีความพิเศษกว่าครั้งอื่นอย่างไร?",
+            options: [
+                "จักรพรรดิฟรีดริชที่ 2 ใช้การเจรจาทางการทูตเอาเมืองเยรูซาเล็มคืนมาโดยไม่ต้องรบ",
+                "เป็นครั้งที่มีทหารมากที่สุดในประวัติศาสตร์",
+                "ฝ่ายมุสลิมเปลี่ยนมานับถือศาสนาคริสต์"
+            ],
+            ans: 0,
+            exp: "ถูกต้อง! จักรพรรดิฟรีดริชที่ 2 สามารถทำสนธิสัญญาเจรจาได้สำเร็จโดยแทบไม่ได้เสียเลือดเนื้อ"
+        },
+        {
+            num: 7,
+            q: "กษัตริย์ฝรั่งเศสองค์ใดที่เป็นผู้นำหลักในสงครามครูเสดครั้งที่ 7 (แต่กลับถูกจับเป็นเชลยที่อียิปต์)?",
+            options: ["พระเจ้าหลุยส์ที่ 9 (Saint Louis)", "พระเจ้าฟิลิปที่ 2", "พระเจ้าชาเลอมาญ"],
+            ans: 0,
+            exp: "ถูกต้อง! พระเจ้าหลุยส์ที่ 9 นำทัพบุกอียิปต์แต่พ่ายแพ้ในยุทธการอัลมานซูราห์และถูกจับเป็นเชลยก่อนสู้ราคาไถ่ตัว"
+        },
+        {
+            num: 8,
+            q: "ในสงครามครูเสดครั้งที่ 8 กองทัพเบี่ยงเบนไปบุกเมืองใด และจบลงด้วยสาเหตุใด?",
+            options: [
+                "บุกตูนีเซีย และพระเจ้าหลุยส์ที่ 9 สิ้นพระชนม์ด้วยโรคระบาด",
+                "บุกโรม และโดนพายุสิ้นชีพ",
+                "บุกเปอร์เซีย และพ่ายแพ้ต่อกองทัพมงโกล"
+            ],
+            ans: 0,
+            exp: "ถูกต้อง! พระเจ้าหลุยส์ที่ 9 ยกทัพไปบุกเมืองตูนิส (ตูนีเซีย) แต่ทหารและองค์กษัตริย์ประชวรเสียชีวิตด้วยกาฬโรค/อหิวาตกโรค"
+        },
+        {
+            num: 9,
+            q: "สงครามครูเสดครั้งที่ 9 นำโดยเจ้าชายเอ็ดเวิร์ดแห่งอังกฤษ ถือเป็นสัญลักษณ์ของอะไร?",
+            options: [
+                "การเริ่มต้นยุคทองของครูเสด",
+                "การสิ้นสุดยุคสงครามครูเสดหลักในดินแดนศักดิ์สิทธิ์",
+                "การรวมชาติของยุโรป"
+            ],
+            ans: 1,
+            exp: "ถูกต้อง! ครั้งที่ 9 เป็นบทสรุปการพยายามครั้งสุดท้ายของกษัตริย์ยุโรป ก่อนที่ฐานที่มั่นสุดท้ายจะตกเป็นของมุสลิมอย่างสมบูรณ์"
+        }
+    ];
+
+    let currentQ = 0;
+    let hp = 100;
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const qData = questions[currentQ];
+        document.getElementById('crusade-num').innerText = qData.num;
+        document.getElementById('question-text').innerText = qData.q;
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('next-btn').classList.add('hidden');
+
+        const optionsDiv = document.getElementById('options-container');
+        optionsDiv.innerHTML = '';
+
+        qData.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.innerText = opt;
+            btn.onclick = () => selectAnswer(idx);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function selectAnswer(selectedIdx) {
+        const qData = questions[currentQ];
+        const expDiv = document.getElementById('explanation');
+        
+        // ปิดปุ่มตัวเลือกไม่ให้กดซ้ำ
+        const btns = document.querySelectorAll('#options-container .btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (selectedIdx === qData.ans) {
+            expDiv.innerHTML = "✅ " + qData.exp;
+            expDiv.style.borderColor = "#2ecc71";
+        } else {
+            hp -= 25; // ตอบผิดหัก HP
+            if (hp < 0) hp = 0;
+            document.getElementById('hp').innerText = hp;
+            expDiv.innerHTML = "❌ **ตอบผิด!** (เสบียงลดลง 25%)<br>" + qData.exp;
+            expDiv.style.borderColor = "#e74c3c";
+        }
+
+        expDiv.style.display = 'block';
+
+        if (hp <= 0) {
+            setTimeout(endGameFailed, 1500);
+        } else {
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+    }
+
+    function nextQuestion() {
+        currentQ++;
+        if (currentQ < questions.length) {
+            showQuestion();
+        } else {
+            endGameSuccess();
+        }
+    }
+
+    function endGameSuccess() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('end-title').innerText = "🏆 ชัยชนะอันยิ่งใหญ่!";
+        document.getElementById('end-title').style.color = "#ffd700";
+        document.getElementById('end-message').innerText = `ท่านสามารถนำทัพผ่านพ้นประวัติศาสตร์สงครามครูเสดทั้ง 9 ครั้งได้สำเร็จ! เหลือเสบียงทหาร ${hp}%`;
+    }
+
+    function endGameFailed() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('end-title').innerText = "💀 กองทัพพ่ายแพ้!";
+        document.getElementById('end-title').style.color = "#e74c3c";
+        document.getElementById('end-message').innerText = "เสบียงและกองกำลังของท่านหมดลงกลางทางเนื่องจากขาดความรู้ทางประวัติศาสตร์ ลองทบทวนแล้วมาเริ่มใหม่นะ!";
+    }
+</script>
+
+</body>
+</html>
